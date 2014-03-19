@@ -61,18 +61,6 @@
 #define GL_MAX_3D_TEXTURE_SIZE_OES 0x8073
 #endif
 
-/* This extension isn't available for GLES 1.1 so these won't be
-   defined */
-#ifndef GL_UNPACK_ROW_LENGTH
-#define GL_UNPACK_ROW_LENGTH 0x0CF2
-#endif
-#ifndef GL_UNPACK_SKIP_ROWS
-#define GL_UNPACK_SKIP_ROWS 0x0CF3
-#endif
-#ifndef GL_UNPACK_SKIP_PIXELS
-#define GL_UNPACK_SKIP_PIXELS 0x0CF4
-#endif
-
 static GLuint
 _cogl_texture_driver_gen (CoglContext *ctx,
                           GLenum gl_target,
