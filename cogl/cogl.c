@@ -34,6 +34,8 @@
 #include <math.h>
 #include <stdlib.h>
 
+#include "bcm_host.h"
+
 #define COGL_VERSION_MIN_REQUIRED COGL_VERSION_1_4
 
 #include "cogl-i18n-private.h"
@@ -767,6 +769,8 @@ _cogl_init (void)
       _cogl_config_read ();
       _cogl_debug_check_environment ();
       initialized = TRUE;
+
+      bcm_host_init();
     }
 }
 
