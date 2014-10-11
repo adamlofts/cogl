@@ -35,6 +35,8 @@
 #include "config.h"
 #endif
 
+#include "bcm_host.h"
+
 #include "cogl-winsys-egl-null-private.h"
 #include "cogl-winsys-egl-private.h"
 #include "cogl-renderer-private.h"
@@ -83,6 +85,7 @@ error:
   return FALSE;
 }
 
+
 static CoglBool
 _cogl_winsys_egl_context_created (CoglDisplay *display,
                                   CoglError **error)
@@ -93,10 +96,47 @@ _cogl_winsys_egl_context_created (CoglDisplay *display,
   CoglDisplayNull *null_display = egl_display->platform;
   const char *error_message;
 
+  DISPMANX_ELEMENT_HANDLE_T dispman_element;
+  DISPMANX_DISPLAY_HANDLE_T dispman_display;
+  DISPMANX_UPDATE_HANDLE_T dispman_update;
+  VC_RECT_T dst_rect;
+  VC_RECT_T src_rect;
+
+  uint32_t screen_width;
+  uint32_t screen_height;
+  int success = graphics_get_display_size(0 /* LCD */, &screen_width, &screen_height);
+  if (success < 0) {
+    error_message = "graphics_get_display_size() failed";
+    goto fail;
+  }
+
+   dst_rect.x = 0;
+   dst_rect.y = 0;
+   dst_rect.width = screen_width;
+   dst_rect.height = screen_height;
+      
+   src_rect.x = 0;
+   src_rect.y = 0;
+   src_rect.width = screen_width << 16;
+   src_rect.height = screen_height << 16;        
+
+   dispman_display = vc_dispmanx_display_open( 0 /* LCD */);
+   dispman_update = vc_dispmanx_update_start( 0 );
+         
+   dispman_element = vc_dispmanx_element_add ( dispman_update, dispman_display,
+      0/*layer*/, &dst_rect, 0/*src*/,
+      &src_rect, DISPMANX_PROTECTION_NONE, 0 /*alpha*/, 0/*clamp*/, 0/*transform*/);
+
+   static EGL_DISPMANX_WINDOW_T nativewindow;
+   nativewindow.element = dispman_element;
+   nativewindow.width = screen_width;
+   nativewindow.height = screen_height;
+   vc_dispmanx_update_submit_sync( dispman_update );
+      
   egl_display->egl_surface =
     eglCreateWindowSurface (egl_renderer->edpy,
                             egl_display->egl_config,
-                            (EGLNativeWindowType) NULL,
+                            &nativewindow,
                             NULL);
   if (egl_display->egl_surface == EGL_NO_SURFACE)
     {
@@ -113,6 +153,10 @@ _cogl_winsys_egl_context_created (CoglDisplay *display,
       goto fail;
     }
 
+  null_display->egl_surface_width = screen_width;
+  null_display->egl_surface_height = screen_height;
+
+/*
   eglQuerySurface (egl_renderer->edpy,
                    egl_display->egl_surface,
                    EGL_WIDTH,
@@ -122,6 +166,7 @@ _cogl_winsys_egl_context_created (CoglDisplay *display,
                    egl_display->egl_surface,
                    EGL_HEIGHT,
                    &null_display->egl_surface_height);
+*/
 
   return TRUE;
 
