@@ -239,6 +239,7 @@ _cogl_framebuffer_gl_flush_front_face_winding_state (CoglFramebuffer *framebuffe
 static void
 _cogl_framebuffer_gl_flush_stereo_mode_state (CoglFramebuffer *framebuffer)
 {
+#if 0
   CoglContext *ctx = framebuffer->context;
   GLenum draw_buffer = GL_BACK;
 
@@ -267,6 +268,7 @@ _cogl_framebuffer_gl_flush_stereo_mode_state (CoglFramebuffer *framebuffer)
       GE (ctx, glDrawBuffer (draw_buffer));
       ctx->current_gl_draw_buffer = draw_buffer;
     }
+#endif
 }
 
 void
